@@ -1,8 +1,8 @@
 # Farmer's Pickup
 
 A two-seat farm truck for [Vanilla Wheels](https://github.com/the-rusty-shackleford/minecraft-vanilla-wheels)
-on NeoForge 1.21.1, built by nfx: a red single-cab pickup with a working tailgate, a chest
-in the bed, a dash with a speedometer and a fuel gauge, headlights, a horn, a radio and a
+on NeoForge 1.21.1, built by nfx: a red single-cab pickup with a working tailgate, two
+chests in the bed, a dash with a speedometer and a fuel gauge, headlights, a horn, a radio and a
 hitch for a [trailer](https://github.com/the-rusty-shackleford/minecraft-trailer). There is
 no Java in it: the truck is a vehicle profile and two Blockbench meshes, and the protocol
 does the rest, so driving, fuel, storage, towing and the lift are documented there.
@@ -21,7 +21,8 @@ Right-click to board (the driver's seat first); movement keys drive, jump held i
 drifts, Left Control honks, H cycles the headlights. Look down from the driver's seat and
 the two dials on the dash read your speed and your tank. Crouch and right-click the
 tailgate, empty-handed, within a block and a half of its hinge to drop or raise it.
-Right-click the bed for the chest (crouching), or press the inventory key while riding.
+Right-click either of the two chests in the bed to open it, or press the inventory key
+while riding for the left one.
 Crouch and right-click with a music disc to play it; crouch and right-click the dash
 empty-handed to eject it. Hold a trailer and right-click the truck to hitch it behind, or
 back the rear hitch onto a loose trailer's tongue.
@@ -47,8 +48,9 @@ centre, the gauge's pivot. The profile is
 measured off the cubes the way the Trailblazer's is: the seats four tenths of a unit over
 the cushion, the wheels off `wheel_0_left`'s axle, the hit boxes fender-wide at each axle,
 the body cab-wide and bumper to hitch, the lamps half a unit ahead of the lenses, the
-hitch ball's rear face, the bed's front wall for the chest region, the tailgate's hinge
-off its folder's pivot with a quarter turn about +X. Units are sixteenths of a block.
+hitch ball's rear face, two double chests of six rows along the bed's sides, facing in,
+scaled to sit side by side on its floor, the tailgate's hinge off its folder's pivot with a
+quarter turn about +X. Units are sixteenths of a block.
 
 ## Verifying it
 
@@ -59,7 +61,7 @@ uv run --no-project python devtools/art/build.py     # split the project and wri
 ```
 
 Seven gametests on a headless server: the profile is registered as described (two seats,
-a tailgate, six rows, four wheels, two gauges, a hitch, a radio, headlights); the truck
+a tailgate, two chests of six rows, four wheels, two gauges, a hitch, a radio, headlights); the truck
 reaches speed and climbs a one-block step, and a two-block ledge holds it level; runs a
 cow over for the damage its mass and speed say; takes coal; crafts its chassis; takes and
 ejects a disc. The booth photographs the truck's side red and painted light blue, the

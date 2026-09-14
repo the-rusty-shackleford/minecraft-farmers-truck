@@ -93,7 +93,8 @@ public final class PickupGameTests {
         helper.assertValueEqual(t.doors().size(), 1, "a tailgate");
         helper.assertValueEqual((int) t.seats().stream().filter(VehicleProfile.Seat::driver).count(), 1, "one driver");
         helper.assertTrue(t.engine().isPresent(), "an engine");
-        helper.assertValueEqual(t.storage().map(VehicleProfile.Storage::rows).orElse(0), 6, "a chest of six rows");
+        helper.assertValueEqual(t.storage().map(s -> s.chests().size()).orElse(0), 2, "two chests");
+        helper.assertValueEqual(t.storage().map(s -> s.chests().get(1).rows()).orElse(0), 6, "of six rows");
         helper.assertValueEqual(t.wheels().positions().size(), 4, "four wheels");
         helper.assertValueEqual(t.gauges().size(), 2, "two gauges");
         helper.assertTrue(t.hitch().rear().isPresent(), "a hitch");

@@ -248,6 +248,12 @@ tyre_top = box("tyre_0_0")[1][1]
 tg = find_group(m["outliner"], "tailgate_hinge"); tg_origin = [g for g in m["groups"] if g["uuid"] == tg["uuid"]][0]["origin"]
 bed_front_z = box("bed_front")[1][2]
 dash_top = box("dash_top")
+# The bed's inside: between the side walls, tailgate to front wall, on the floor's top.
+bed_x = box("bed_side_left")[0][0]
+bed_z = round((box("bed_floor")[0][2] + box("bed_floor")[1][2]) / 2, 2)
+bed_floor_top = box("bed_floor")[1][1]
+bed_len = box("bed_floor")[1][2] - box("bed_floor")[0][2]
+chest_scale = round(min(bed_len / 32.0, (2 * bed_x) / 32.0, (box("bed_side_left")[1][1] - bed_floor_top) / 14.0) * 0.95, 2)
 
 PROFILE = {
     "mesh": f"{MODID}:{VEHICLE}",
@@ -268,7 +274,11 @@ PROFILE = {
     "climb": 1.0,
     "mass": 1.45,
     "fuel": {"capacity": 24000},
-    "storage": {"rows": 6, "region": {"z_max": bed_front_z}},        # click anywhere on the bed
+    # Two double chests in the bed, one along each side, facing inward, scaled to fit the bed's floor
+    # side by side (a double chest is two blocks long and one deep before the scale); six rows each.
+    "storage": {"chests": [
+        {"at": [round(bed_x - 8 * chest_scale, 2), bed_floor_top, bed_z], "yaw": 90, "scale": chest_scale, "rows": 6},
+        {"at": [round(-(bed_x - 8 * chest_scale), 2), bed_floor_top, bed_z], "yaw": -90, "scale": chest_scale, "rows": 6}]},
     "gauges": [
         {"kind": "speed", "part": {"group": "needle_speed_grp"},
          "pivot": [centre("needle_speed", 0), centre("dial_speed", 1), centre("needle_speed", 2)],
