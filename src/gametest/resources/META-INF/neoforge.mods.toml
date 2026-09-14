@@ -1,0 +1,24 @@
+# The gametests and the photo booth, as a mod of their own; never shipped.
+modLoader="javafml"
+loaderVersion="[1,)"
+license="AGPL-3.0-or-later"
+
+[[mods]]
+modId="farmpickup_gametest"
+version="1.0.0"
+displayName="Farmer's Pickup gametests"
+description='''The Farmer's Pickup's gametests and photo booth.'''
+
+[[dependencies.farmpickup_gametest]]
+    modId="farmpickup"
+    type="required"
+    versionRange="[1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.farmpickup_gametest]]
+    modId="vanillawheels"
+    type="required"
+    versionRange="[1.2,)"
+    ordering="AFTER"
+    side="BOTH"
