@@ -38,5 +38,6 @@ D-0001: the truck is nfx's project under his ids; the build is his, ported.
 ## Next
 
 1.1.0 (2026-09-13): the first release from this repo, past the 1.0.x nfx shipped to his
-instance, on Vanilla Wheels 1.5.0. Then into the pack. Open from his handoff: door meshes
-cannot be dyed (a painted sub-mesh for hinges would fix it at the protocol).
+instance, on Vanilla Wheels 1.5.0, with the gauges moved to the centre of the console (the
+wheel's rim hid them; Rusty) and the tailgate's panels painted, since the protocol now dyes
+a door's painted part. Then into the pack.

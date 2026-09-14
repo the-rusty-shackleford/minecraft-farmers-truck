@@ -194,8 +194,7 @@ public final class PickupBooth {
             int red = count(mc, PickupBooth::red);
             shoot(mc, "booth-side-blue");
             verdict("painted light blue, the side is blue", () -> blue > 1500 ? null : "light-blue pixels " + blue);
-            // The tailgate is a door, drawn untinted, so a little red survives a dye; the panels' red is gone.
-            verdict("and the panels' red is gone", () -> red < 600 ? null : "red pixels " + red);
+            verdict("and the red is gone, the tailgate's too", () -> red < 150 ? null : "red pixels " + red);
         }));
         // The tailgate: dropped, seen from behind and to the side.
         s.add(new Step(t += 2, () -> withCar(mc, v -> {

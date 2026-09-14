@@ -11,8 +11,8 @@ does the rest, so driving, fuel, storage, towing and the lift are documented the
 
 - **Chassis**: eight iron blocks round a hay bale.
 - **Build**: the chassis, four wheels and an engine in a Mechanic Lift, and Build. Paint it
-  there with a dye; it is red to begin with, and a dye replaces the red -- except on the
-  tailgate, which keeps it.
+  there with a dye; it is red to begin with, and a dye replaces the red, the tailgate's
+  panels included.
 - **Pick up**: crouch and right-click with the wrench.
 
 ## Driving it
@@ -40,9 +40,10 @@ holding every red panel. Paint in Vanilla Wheels is a vertex-colour multiply, an
 model bakes its red in, so the build greys the red texels of the painted faces to the same
 brightness and the profile's `factory` colour (the model's own red) restores the look; a
 dye then replaces the red instead of multiplying with it. The tailgate is a door and door
-meshes are drawn untinted, so it keeps its baked red; its atlas patches, shared with the
-bed's sides and rails, are duplicated first so the greying does not reach it. The fuel
-needle is raised so its base sits on the dial's centre, the gauge's pivot. The profile is
+panels are painted too, since a door's painted part takes the dye. The gauges
+are moved to the centre of the console, since nfx set them behind the wheel, whose rim hid
+them from the driver's seat; the fuel needle is raised so its base sits on the dial's
+centre, the gauge's pivot. The profile is
 measured off the cubes the way the Trailblazer's is: the seats four tenths of a unit over
 the cushion, the wheels off `wheel_0_left`'s axle, the hit boxes fender-wide at each axle,
 the body cab-wide and bumper to hitch, the lamps half a unit ahead of the lenses, the

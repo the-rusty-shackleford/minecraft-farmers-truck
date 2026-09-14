@@ -19,9 +19,11 @@ nfx's build, ported from his handoff; what it does to the model and why:
 - Paint in Vanilla Wheels is a vertex-colour multiply (the protocol's own body texture is near-white);
   this model bakes its red in, so the red texels of the painted faces are greyed to the same brightness
   and the profile's `factory` (the model's red) restores the look, so a dye replaces the red instead of
-  multiplying with it. The tailgate is a door, and door meshes are drawn untinted, so it keeps its baked
-  red -- its atlas patches, shared with the bed's sides and rails, are duplicated first.
-- The fuel needle is raised so its base sits on the dial's centre, which is the gauge's pivot.
+  multiplying with it. The tailgate's panels are painted too (a door's painted part takes the dye since
+  Vanilla Wheels 1.5.0); a patch shared between a painted cube and an unpainted one would be duplicated
+  first, though none is now.
+- The gauges are moved to the centre of the console: nfx set them behind the wheel, whose rim hides them
+  from the driver's seat. The fuel needle is raised so its base sits on the dial's centre, the gauge's pivot.
 - The Blockbench animations are dropped; the tailgate swings by the profile's `doors`.
 
 Units are model units, 1/16 block.
@@ -108,6 +110,23 @@ m["textures"][0]["name"] = f"{VEHICLE}.png"
 m["textures"][0]["id"] = "0"
 m.pop("animations", None)          # the loader ignores them; the tailgate swings via the profile's `doors`
 
+# The gauges to the centre of the console: nfx set the binnacle behind the wheel, where the rim hides
+# the dials from the driver's seat (Rusty, 2026-09-13). The binnacle, both dials and both needles slide
+# along x by the binnacle's own centre, to the centreline; the gauge pivots below are measured after.
+def shift_x(model, cube_names, group_names, dx):
+    for e in model["elements"]:
+        if e["name"] in cube_names:
+            e["from"][0] = round(e["from"][0] + dx, 4); e["to"][0] = round(e["to"][0] + dx, 4)
+            if "origin" in e: e["origin"][0] = round(e["origin"][0] + dx, 4)
+    for g in model["groups"]:
+        if g["name"] in group_names:
+            g["origin"][0] = round(g["origin"][0] + dx, 4)
+binnacle = cube(m, "binnacle")
+to_centre = -round((binnacle["from"][0] + binnacle["to"][0]) / 2, 4)
+shift_x(m, {"binnacle", "dial_speed", "dial_fuel", "needle_speed", "needle_fuel"},
+        {"dial_speed_grp", "dial_fuel_grp", "needle_speed_grp", "needle_fuel_grp"}, to_centre)
+print(f"gauges moved {to_centre} along x, to the centre of the console")
+
 # fuel needle: base on the dial centre so the gauge pivot (dial centre) is its root
 dial = cube(m, "dial_fuel"); needle = cube(m, "needle_fuel")
 dial_cy = (dial["from"][1] + dial["to"][1]) / 2
@@ -123,7 +142,9 @@ PAINT = {
     "windshield": ["a_pillar_left", "a_pillar_right", "windshield_header", "windshield_base"],
     "front": ["front_wing_left", "front_wing_right", "hood", "nose_top", "nose_bottom", "nose_side_left", "nose_side_right"],
 }
-# the tailgate (bed/tailgate_hinge) is a door: door meshes are drawn untinted, so it keeps its baked red
+# The tailgate is a door; since Vanilla Wheels 1.5.0 a door's painted panels take the dye like the body's,
+# so its two red cubes are painted too (the tail lights are not).
+PAINT["tailgate_hinge"] = ["tailgate", "tailgate_rail"]
 for parent, names in PAINT.items():
     wrap(m, parent, "paint", names)
 wrap(m, "front", "lenses", ["headlight_left", "headlight_right"])
