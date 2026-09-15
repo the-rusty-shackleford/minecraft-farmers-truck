@@ -246,6 +246,22 @@ cab_w = box("roof")[1][0]
 fender_w = box("flare_fl_2")[1][0]
 tyre_top = box("tyre_0_0")[1][1]
 tg = find_group(m["outliner"], "tailgate_hinge"); tg_origin = [g for g in m["groups"] if g["uuid"] == tg["uuid"]][0]["origin"]
+
+
+def group_box(node):
+    """effects: returns the bounds (from, to) of every cube in the folder, its subfolders included"""
+    uuids = []
+    def gather(n):
+        for c in n.get("children", []):
+            (uuids.append if isinstance(c, str) else gather)(c)
+    gather(node)
+    cubes = [els[u] for u in uuids]
+    lo = [round(min(min(c["from"][i], c["to"][i]) for c in cubes), 2) for i in range(3)]
+    hi = [round(max(max(c["from"][i], c["to"][i]) for c in cubes), 2) for i in range(3)]
+    return lo, hi
+
+
+tg_box = group_box(tg)
 bed_front_z = box("bed_front")[1][2]
 dash_top = box("dash_top")
 # The bed's inside: between the side walls, tailgate to front wall, on the floor's top.
@@ -292,7 +308,8 @@ PROFILE = {
     "horn": "vanillawheels:horn.truck",
     "radio": {"at": [-9, dash_top[1][1], round((dash_top[0][2] + dash_top[1][2]) / 2, 2)]},   # passenger side of the dash top
     "hitch": {"rear": [0, round((hitch_f[1] + hitch_t[1]) / 2, 2), hitch_f[2]]},               # ball centre, rear face
-    "doors": [{"part": {"group": "tailgate_hinge"}, "hinge": tg_origin, "axis": [1, 0, 0], "open": -1.5708}],  # -90 deg drops the tailgate
+    # -90 deg drops the tailgate; its box, up, so a crouching click anywhere on it drops or raises it.
+    "doors": [{"part": {"group": "tailgate_hinge"}, "hinge": tg_origin, "axis": [1, 0, 0], "open": -1.5708, "from": tg_box[0], "to": tg_box[1]}],
     "paint": {"part": {"group": "paint"}, "default": "red", "factory": "#%02x%02x%02x" % FACTORY},
     "glass": {"group": "glass"},
     "sounds": {"engine": "vanillawheels:engine.petrol"},

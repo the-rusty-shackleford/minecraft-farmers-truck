@@ -27,7 +27,7 @@ needle onto its pivot, and measures the profile off the cubes.
 ## How it is verified
 
 `./gradlew check`: seven gametests (profile, the one-block step and the two-block wall,
-running a cow over, coal, the chassis recipe, the radio) and the booth (side red and
+running a cow over, the gas can, the chassis recipe, the radio) and the booth (side red and
 dyed blue, the tailgate dropped, the dash from the seat at speed, the quarters, the lamps
 at night).
 

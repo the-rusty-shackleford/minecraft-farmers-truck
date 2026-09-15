@@ -20,7 +20,7 @@ does the rest, so driving, fuel, storage, towing and the lift are documented the
 Right-click to board (the driver's seat first); movement keys drive, jump held in a turn
 drifts, Left Control honks, H cycles the headlights. Look down from the driver's seat and
 the two dials on the dash read your speed and your tank. Crouch and right-click the
-tailgate, empty-handed, within a block and a half of its hinge to drop or raise it.
+tailgate, empty-handed, anywhere on it, to drop or raise it.
 Right-click either of the two chests in the bed to open it, or press the inventory key
 while riding for the left one.
 Crouch and right-click with a music disc to play it; crouch and right-click the dash
@@ -63,7 +63,7 @@ uv run --no-project python devtools/art/build.py     # split the project and wri
 Seven gametests on a headless server: the profile is registered as described (two seats,
 a tailgate, two chests of six rows, four wheels, two gauges, a hitch, a radio, headlights); the truck
 reaches speed and climbs a one-block step, and a two-block ledge holds it level; runs a
-cow over for the damage its mass and speed say; takes coal; crafts its chassis; takes and
+cow over for the damage its mass and speed say; takes the gas can; crafts its chassis; takes and
 ejects a disc. The booth photographs the truck's side red and painted light blue, the
 tailgate dropped, the view from the driver's seat ahead and down at the dash at speed on
 half a tank, the third-person views, and the lamps at night; its `booth: PASS/FAIL` lines
