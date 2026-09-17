@@ -41,3 +41,11 @@ D-0001: the truck is nfx's project under his ids; the build is his, ported.
 instance, on Vanilla Wheels 1.5.0, with the gauges moved to the centre of the console (the
 wheel's rim hid them; Rusty) and the tailgate's panels painted, since the protocol now dyes
 a door's painted part. Then into the pack.
+
+
+## Release approval - 2026-09-16
+
+Rusty approved the final review, completing their earlier conditional release go.
+Version 1.2.0 is cleared for publication in pack 1.35.0 after the clean
+release build and asset verification. This supersedes the earlier release holds
+and pending presentation/listening review recorded above.
