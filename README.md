@@ -32,31 +32,24 @@ degrees of lock; six and a half blocks long, two and a half wide, three high.
 
 ## How it is made
 
-The truck is nfx's Blockbench project, `devtools/art/preview/pickup.bbmodel`, as saved;
-`devtools/art/build.py` (his build, ported) turns it into what the protocol reads. The
-model was rigged with its own folder names, so the build wraps cubes into the folders the
-profile's selectors name: `lenses` for the headlights, `glass` for the windshield and the
-cab's rear pane, and a `paint` folder inside the bed, cab, doors, windshield and front
-holding every red panel. Paint in Vanilla Wheels is a vertex-colour multiply, and this
-model bakes its red in, so the build greys the red texels of the painted faces to the same
-brightness and the profile's `factory` colour (the model's own red) restores the look; a
-dye then replaces the red instead of multiplying with it. The tailgate is a door and door
-panels are painted too, since a door's painted part takes the dye. The gauges
-are moved to the centre of the console, since nfx set them behind the wheel, whose rim hid
-them from the driver's seat; the fuel needle is raised so its base sits on the dial's
-centre, the gauge's pivot. The profile is
-measured off the cubes the way the Trailblazer's is: the seats four tenths of a unit over
-the cushion, the wheels off `wheel_0_left`'s axle, the hit boxes fender-wide at each axle,
-the body cab-wide and bumper to hitch, the lamps half a unit ahead of the lenses, the
-hitch ball's rear face, two double chests of six rows along the bed's sides, facing in,
-scaled to sit side by side on its floor, the tailgate's hinge off its folder's pivot with a
-quarter turn about +X. Units are sixteenths of a block.
+`devtools/art/preview/pickup.bbmodel` is an approved cosmetic derivative of nfx's
+Blockbench project. The original is preserved in `devtools/art/reference/`, with its
+attribution and checksums. Shaped bonnet and roof corners, continuous painted arch shells with dark trim, recessed rims, lamp bezels, a layered grille and tucked bumpers.
+
+Edit the Blockbench source, then run `devtools/art/build.py --appearance-only`.
+It exports only the body and wheel meshes, supports cube and polygon faces, and refuses
+to run if the vehicle profile differs from the frozen released contract. It does not
+derive gameplay from the reshaped art or rewrite the profile, recipes or language files.
+The importer retains the existing paint wrappers, greys the paint swatches, separates shared tailgate UVs, centres the gauges and lifts the fuel needle onto its original pivot.
+
+See D-0002 for the art direction and gameplay boundary. The cosmetic changes in 1.3.0 do not change the driving, interactions or construction described above.
 
 ## Verifying it
 
 ```
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 PATH="$JAVA_HOME/bin:$PATH"
-uv run --no-project python devtools/art/build.py     # split the project and write the profile
+uv run --no-project python devtools/art/build.py --appearance-only
+uv run --no-project --with pillow python -m unittest discover -s devtools/art -p "test_appearance.py"
 ./gradlew check                                       # gametests and the photo booth (needs a display)
 ```
 
@@ -67,9 +60,17 @@ cow over for the damage its mass and speed say; takes the gas can; crafts its ch
 ejects a disc. The booth photographs the truck's side red and painted light blue, the
 tailgate dropped, the view from the driver's seat ahead and down at the dash at speed on
 half a tank, the third-person views, and the lamps at night; its `booth: PASS/FAIL` lines
-are the assertion. Headless: `Xephyr :7 -screen 1280x720 -ac -br -noreset`, then
-`DISPLAY=:7 __GLX_VENDOR_LIBRARY_NAME=mesa LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
-MESA_GL_VERSION_OVERRIDE=4.6 MESA_GLSL_VERSION_OVERRIDE=460 ./gradlew check`.
+are the assertion. For server-only checks, run
+`./gradlew --no-watch-fs check -PskipBooth`. For the shader booth, use a native GPU display
+with Iris, Sodium and Complementary in `run/booth/`. Verify host clients and Xephyr first,
+reuse the existing display, and run only one rendering client. The booth mutes itself and exits.
+
+The paint check includes shaded red under Complementary, using the light-blue repaint
+as its negative control; dashboard needles retain a separate brightness check.
+
+## Release 1.3.0
+
+The approved cosmetic derivative ships with Vanilla Wheels 1.7.0 and Luminance 1.1.0. Vehicle gameplay data and original supplied-model references are preserved. Update every client and the server together for network protocol 4.
 
 ## Licence
 

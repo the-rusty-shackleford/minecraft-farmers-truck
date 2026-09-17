@@ -13,3 +13,4 @@ tags: [index]
 | Id | Topic |
 |----|-------|
 | D-0001 | The truck is nfx's Blockbench project under his ids; his build, ported, is the pipeline |
+| D-0002 | Approved cosmetic derivative; appearance-only imports preserve the released gameplay profile (partially supersedes D-0001) |

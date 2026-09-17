@@ -112,8 +112,8 @@ dependencies {
     // keeps one copy of each across the pack.
     jarJar(implementation("com.chunkworks.vanillawheels:vanillawheels")) {
         version {
-            strictly "[1.5,2.0)"
-            prefer "1.6.0"
+            strictly "[1.7,2.0)"
+            prefer "1.7.0"
         }
     }
 

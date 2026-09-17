@@ -33,6 +33,6 @@ headlights, a horn, a radio and a hitch for a trailer. nfx's truck.
 [[dependencies.${mod_id}]]
     modId="vanillawheels"
     type="required"
-    versionRange="[1.6.0,2.0)"
+    versionRange="[1.7.0,2.0)"
     ordering="AFTER"
     side="BOTH"

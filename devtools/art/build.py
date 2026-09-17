@@ -1,32 +1,9 @@
-"""The Farmer's Pickup's art, as code: nfx's Blockbench project split into what Vanilla Wheels reads, and the profile off it.
+"""Import the approved cosmetic Blockbench derivative without changing gameplay.
 
-Run from the repository root:
-
-    uv run --no-project python devtools/art/build.py
-
-Reads devtools/art/preview/pickup.bbmodel -- nfx's project as saved (his pickup_2seater_Final of 2026-09-11) -- and writes:
-
-  src/main/resources/assets/farmpickup/vanillawheels/mesh/pickup.bbmodel        the body: everything but the wheels
-  src/main/resources/assets/farmpickup/vanillawheels/mesh/pickup_wheel.bbmodel  wheel_0_left, recentred on its axle
-  src/main/resources/data/farmpickup/vanillawheels/vehicle/pickup.json          the profile, its numbers measured off the cubes
-  src/main/resources/assets/farmpickup/lang/en_us.json
-
-nfx's build, ported from his handoff; what it does to the model and why:
-
-- The model was rigged with its own folder names, so cubes are wrapped into the folders the profile's
-  selectors name: `lenses` (the headlights), `glass` (the windshield and the cab's rear pane), and a
-  `paint` folder inside bed, cab, doors, windshield and front holding every red panel.
-- Paint in Vanilla Wheels is a vertex-colour multiply (the protocol's own body texture is near-white);
-  this model bakes its red in, so the red texels of the painted faces are greyed to the same brightness
-  and the profile's `factory` (the model's red) restores the look, so a dye replaces the red instead of
-  multiplying with it. The tailgate's panels are painted too (a door's painted part takes the dye since
-  Vanilla Wheels 1.5.0); a patch shared between a painted cube and an unpainted one would be duplicated
-  first, though none is now.
-- The gauges are moved to the centre of the console: nfx set them behind the wheel, whose rim hides them
-  from the driver's seat. The fuel needle is raised so its base sits on the dial's centre, the gauge's pivot.
-- The Blockbench animations are dropped; the tailgate swings by the profile's `doors`.
-
-Units are model units, 1/16 block.
+Run with --appearance-only. The released profile and original model are retained in
+reference/. The profile is checked before import and is never regenerated from artwork.
+This preserves nfx's rig and the existing gameplay while allowing deliberate art edits.
+Copyright 2026 Rusty Shackleford and nfx. SPDX-License-Identifier: AGPL-3.0-or-later.
 """
 from __future__ import annotations
 
@@ -35,6 +12,8 @@ import copy
 import json
 import sys
 from pathlib import Path
+
+from appearance import require_appearance_only, shift_uv, uv_bounds
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from png import png_decode, png_encode  # noqa: E402
@@ -49,6 +28,8 @@ MESH = ASSETS / "vanillawheels/mesh"
 FACTORY = (178, 33, 37)          # the model's body red; painted texels are greyed relative to it
 BASE_LUM = 0.299 * FACTORY[0] + 0.587 * FACTORY[1] + 0.114 * FACTORY[2]
 
+PROFILE_PATH = DATA / "vanillawheels/vehicle/pickup.json"
+PROFILE_BYTES = require_appearance_only(PROFILE_PATH, ROOT / "devtools/art/reference/released-profile.json")
 m = json.loads(SRC.read_text(encoding="utf-8"))
 gname = {g["uuid"]: g["name"] for g in m["groups"]}
 els = {e["uuid"]: e for e in m["elements"]}
@@ -144,6 +125,7 @@ PAINT = {
 }
 # The tailgate is a door; since Vanilla Wheels 1.5.0 a door's painted panels take the dye like the body's,
 # so its two red cubes are painted too (the tail lights are not).
+PAINT["fenders"] = ["flare_fl_0", "flare_fr_0", "flare_rl_0", "flare_rr_0"]
 PAINT["tailgate_hinge"] = ["tailgate", "tailgate_rail"]
 for parent, names in PAINT.items():
     wrap(m, parent, "paint", names)
@@ -159,7 +141,7 @@ painted = {n for names in PAINT.values() for n in names}
 rects = {}
 for e in m["elements"]:
     for f in e["faces"].values():
-        u0, v0, u1, v1 = f["uv"]
+        u0, v0, u1, v1 = uv_bounds(f["uv"])
         r = (int(round(min(u0, u1) * sx)), int(round(min(v0, v1) * sy)), int(round(max(u0, u1) * sx)), int(round(max(v0, v1) * sy)))
         rects.setdefault(r, set()).add(e["name"])
 # a patch shared by a painted cube and an unpainted one (the tailgate reuses the bed side/rail
@@ -180,10 +162,10 @@ for r, names in [(r, n) for r, n in rects.items() if (n & painted) and (n - pain
     for e in m["elements"]:
         if e["name"] in names - painted:
             for f in e["faces"].values():
-                u0, v0, u1, v1 = f["uv"]
+                u0, v0, u1, v1 = uv_bounds(f["uv"])
                 if (int(round(min(u0, u1) * sx)), int(round(min(v0, v1) * sy)), int(round(max(u0, u1) * sx)), int(round(max(v0, v1) * sy))) == r:
                     du, dv = (x - r[0]) / sx, (y - r[1]) / sy
-                    f["uv"] = [round(u0 + du, 4), round(v0 + dv, 4), round(u1 + du, 4), round(v1 + dv, 4)]
+                    f["uv"] = shift_uv(f["uv"], du, dv)
     rects[(x, y, x + w, y + h)] = names - painted
     rects[r] = names & painted
     print(f"patch {r} duplicated at ({x},{y}) for {sorted(names - painted)}")
@@ -222,102 +204,14 @@ cx, cy, cz = centres.pop()
 tread = max(abs(e["to"][1] - cy) for e in wheel["elements"] if not any(e.get("rotation", [0, 0, 0])) and e["name"].startswith("tyre"))
 def shift(v): return [round(v[0] - cx, 4), round(v[1] - cy, 4), round(v[2] - cz, 4)]
 for e in wheel["elements"]:
-    e["from"] = shift(e["from"]); e["to"] = shift(e["to"])
+    if e.get("type", "cube") == "cube":
+        e["from"] = shift(e["from"]); e["to"] = shift(e["to"])
     if "origin" in e: e["origin"] = shift(e["origin"])
 for g in wheel["groups"]: g["origin"] = [0, 0, 0]
 wheel["name"] = f"{VEHICLE}_wheel"; wheel["model_identifier"] = f"{VEHICLE}_wheel"
 (MESH / f"{VEHICLE}_wheel.bbmodel").write_text(json.dumps(wheel, separators=(",", ":")), encoding="utf-8")
 print(f"wheel: axle centre ({cx}, {cy}, {cz}) tread radius {tread} elements {len(wheel['elements'])}")
 
-# ---------------------------------------------------------------- profile (model units, scale 1/16)
-def box(name):
-    e = cube(m, name); return e["from"], e["to"]
-def centre(name, i):
-    f, t = box(name); return round((f[i] + t[i]) / 2, 3)
-
-cushion_top = box("seat_cushion_left")[1][1]
-seat_y = round(cushion_top + 0.42, 2)              # Trailblazer: seat point 0.42 above the cushion top
-seat_x, seat_z = centre("seat_cushion_left", 0), centre("seat_cushion_left", 2)
-hitch_f, hitch_t = box("hitch")
-lens_f, lens_t = box("headlight_left")
-bumper_rear = min(hitch_f[2], box("bumper_rear")[0][2]); bumper_front = box("bumper_front")[1][2]
-roof_top = box("roof")[1][1]
-cab_w = box("roof")[1][0]
-fender_w = box("flare_fl_2")[1][0]
-tyre_top = box("tyre_0_0")[1][1]
-tg = find_group(m["outliner"], "tailgate_hinge"); tg_origin = [g for g in m["groups"] if g["uuid"] == tg["uuid"]][0]["origin"]
-
-
-def group_box(node):
-    """effects: returns the bounds (from, to) of every cube in the folder, its subfolders included"""
-    uuids = []
-    def gather(n):
-        for c in n.get("children", []):
-            (uuids.append if isinstance(c, str) else gather)(c)
-    gather(node)
-    cubes = [els[u] for u in uuids]
-    lo = [round(min(min(c["from"][i], c["to"][i]) for c in cubes), 2) for i in range(3)]
-    hi = [round(max(max(c["from"][i], c["to"][i]) for c in cubes), 2) for i in range(3)]
-    return lo, hi
-
-
-tg_box = group_box(tg)
-bed_front_z = box("bed_front")[1][2]
-dash_top = box("dash_top")
-# The bed's inside: between the side walls, tailgate to front wall, on the floor's top.
-bed_x = box("bed_side_left")[0][0]
-bed_z = round((box("bed_floor")[0][2] + box("bed_floor")[1][2]) / 2, 2)
-bed_floor_top = box("bed_floor")[1][1]
-bed_len = box("bed_floor")[1][2] - box("bed_floor")[0][2]
-chest_scale = round(min(bed_len / 32.0, (2 * bed_x) / 32.0, (box("bed_side_left")[1][1] - bed_floor_top) / 14.0) * 0.95, 2)
-
-PROFILE = {
-    "mesh": f"{MODID}:{VEHICLE}",
-    "wheel_mesh": f"{MODID}:{VEHICLE}_wheel",
-    "scale": 0.0625,
-    "handedness": "right",
-    "body": {                                       # cab width x bumper-to-hitch length x roof height, in blocks
-        "width": round(2 * cab_w / 16, 2), "length": round((bumper_front - bumper_rear) / 16, 2), "height": round(roof_top / 16, 2),
-        "parts": [{"at": [0, cy, cz], "width": round(2 * fender_w / 16, 2), "height": round(tyre_top / 16, 2)},
-                  {"at": [0, cy, -cz], "width": round(2 * fender_w / 16, 2), "height": round(tyre_top / 16, 2)}]},
-    "seats": [{"at": [seat_x, seat_y, seat_z], "driver": True}, {"at": [-seat_x, seat_y, seat_z]}],
-    "wheels": {"radius": tread, "positions": [
-        {"forward": cz, "right": cx, "up": cy, "steers": True}, {"forward": cz, "right": -cx, "up": cy, "steers": True},
-        {"forward": -cz, "right": cx, "up": cy}, {"forward": -cz, "right": -cx, "up": cy}]},
-    # driving numbers identical to the Trailblazer's (climb 1.0: two-block climbs lurch worst)
-    "engine": {"max_speed": 0.9, "acceleration": 0.02, "reverse_speed": 0.3, "brake": 0.05, "drag": 0.01},
-    "handling": {"grip": 0.85, "steer_degrees": 32, "drift_grip": 0.12, "drift_boost": 0.3, "drift_charge_ticks": 40},
-    "climb": 1.0,
-    "mass": 1.45,
-    "fuel": {"capacity": 24000},
-    # Two double chests in the bed, one along each side, facing inward, scaled to fit the bed's floor
-    # side by side (a double chest is two blocks long and one deep before the scale); six rows each.
-    "storage": {"chests": [
-        {"at": [round(bed_x - 8 * chest_scale, 2), bed_floor_top, bed_z], "yaw": 90, "scale": chest_scale, "rows": 6},
-        {"at": [round(-(bed_x - 8 * chest_scale), 2), bed_floor_top, bed_z], "yaw": -90, "scale": chest_scale, "rows": 6}]},
-    "gauges": [
-        {"kind": "speed", "part": {"group": "needle_speed_grp"},
-         "pivot": [centre("needle_speed", 0), centre("dial_speed", 1), centre("needle_speed", 2)],
-         "axis": [0, 0, 1], "zero": -2.094, "sweep": 4.189},
-        {"kind": "fuel", "part": {"group": "needle_fuel_grp"},
-         "pivot": [centre("needle_fuel", 0), centre("dial_fuel", 1), centre("needle_fuel", 2)],
-         "axis": [0, 0, 1], "zero": -2.094, "sweep": 4.189}],
-    "headlights": {"at": [[centre("headlight_left", 0), centre("headlight_left", 1), round(lens_t[2] + 0.5, 2)],
-                          [-centre("headlight_left", 0), centre("headlight_left", 1), round(lens_t[2] + 0.5, 2)]],
-                   "part": {"group": "lenses"}, "range": 10},
-    "horn": "vanillawheels:horn.truck",
-    "radio": {"at": [-9, dash_top[1][1], round((dash_top[0][2] + dash_top[1][2]) / 2, 2)]},   # passenger side of the dash top
-    "hitch": {"rear": [0, round((hitch_f[1] + hitch_t[1]) / 2, 2), hitch_f[2]]},               # ball centre, rear face
-    # -90 deg drops the tailgate; its box, up, so a crouching click anywhere on it drops or raises it.
-    "doors": [{"part": {"group": "tailgate_hinge"}, "hinge": tg_origin, "axis": [1, 0, 0], "open": -1.5708, "from": tg_box[0], "to": tg_box[1]}],
-    "paint": {"part": {"group": "paint"}, "default": "red", "factory": "#%02x%02x%02x" % FACTORY},
-    "glass": {"group": "glass"},
-    "sounds": {"engine": "vanillawheels:engine.petrol"},
-}
-pdir = DATA / "vanillawheels/vehicle"
-pdir.mkdir(parents=True, exist_ok=True)
-(pdir / f"{VEHICLE}.json").write_text(json.dumps(PROFILE, indent=2) + "\n", encoding="utf-8")
-(ASSETS / "lang").mkdir(parents=True, exist_ok=True)
-(ASSETS / "lang/en_us.json").write_text(json.dumps({f"vehicle.{MODID}.{VEHICLE}": "Farmer's Pickup"}, indent=2) + "\n", encoding="utf-8")
-print(json.dumps({k: PROFILE[k] for k in ("body", "seats", "wheels", "storage", "gauges", "headlights", "hitch", "doors")}, indent=1))
-
+# Gameplay is an explicit contract, not a side effect of cosmetic geometry.
+assert PROFILE_PATH.read_bytes() == PROFILE_BYTES
+print("appearance-only: gameplay profile unchanged")

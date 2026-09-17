@@ -133,7 +133,7 @@ public final class PickupBooth {
             case SETTLING -> {
                 // A slow renderer may still be meshing the world around the camera: wait until the
                 // truck's paint is actually in the frame, up to twenty seconds.
-                if (tick++ % 10 == 0 && (count(mc, PickupBooth::red) > 200 || tick > 400)) {
+                if (tick++ % 10 == 0 && (count(mc, PickupBooth::redPaint) > 200 || tick > 400)) {
                     phase = Phase.RUNNING;
                     tick = 0;
                 }
@@ -189,7 +189,7 @@ public final class PickupBooth {
         int t = HOLD;
         s.add(new Step(t, () -> {
             int blue = count(mc, PickupBooth::lightBlue);
-            int red = count(mc, PickupBooth::red);
+            int red = count(mc, PickupBooth::redPaint);
             shoot(mc, "booth-side-stock");
             verdict("the stock truck's side shows its factory red", () -> red > 1500 ? null : "red pixels " + red);
             verdict("and nothing light blue", () -> blue < 150 ? null : "light-blue pixels " + blue);
@@ -197,7 +197,7 @@ public final class PickupBooth {
         s.add(new Step(t += 2, () -> withCar(mc, v -> v.setPaint(DyeColor.LIGHT_BLUE))));
         s.add(new Step(t += SETTLE / 2, () -> {
             int blue = count(mc, PickupBooth::lightBlue);
-            int red = count(mc, PickupBooth::red);
+            int red = count(mc, PickupBooth::redPaint);
             shoot(mc, "booth-side-blue");
             verdict("painted light blue, the side is blue", () -> blue > 1500 ? null : "light-blue pixels " + blue);
             verdict("and the red is gone, the tailgate's too", () -> red < 150 ? null : "red pixels " + red);
@@ -397,7 +397,17 @@ public final class PickupBooth {
         return r < 130 && g > r + 40 && b > r + 60 && b > 140;
     }
 
-    /** The same swatch under red dye, on a lit or a shaded face; not the hazard stripe's yellow. */
+    /**
+     * effects: identifies red body paint in shader shade; rejects near-black trim.
+     * The light-blue repaint is the negative control. Dashboard needles keep their
+     * separate brightness predicate below.
+     */
+    private static boolean redPaint(int rgb) {
+        int r = rgb >> 16 & 0xFF, g = rgb >> 8 & 0xFF, b = rgb & 0xFF;
+        return r > 32 && r > g * 1.2 && r > b * 1.1;
+    }
+
+    /** effects: identifies the brighter red dashboard needles. */
     private static boolean red(int rgb) {
         int r = rgb >> 16 & 0xFF, g = rgb >> 8 & 0xFF, b = rgb & 0xFF;
         return r > 80 && g < 110 && r > g + 40 && r > b + 40;
