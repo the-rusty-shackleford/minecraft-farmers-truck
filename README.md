@@ -75,3 +75,9 @@ The approved cosmetic derivative ships with Vanilla Wheels 1.7.0 and Luminance 1
 ## Licence
 
 AGPL-3.0-or-later. Copyright 2026 Rusty Shackleford and nfx.
+
+## Shared materials dependency
+
+Version 1.3.1 bundles Vanilla Wheels 1.7.2, which requires Metals and Materials
+as a separately installed mod on both client and server. Mod Hub includes it
+in our pack. Vehicle profiles, models, recipes and handling are unchanged.
