@@ -226,5 +226,11 @@
   },
   "sounds": {
     "engine": "vanillawheels:engine.petrol"
+  },
+  "repair": {
+    "ingredient": {
+      "tag": "c:ingots/iron"
+    },
+    "full_cost": 18
   }
 }
