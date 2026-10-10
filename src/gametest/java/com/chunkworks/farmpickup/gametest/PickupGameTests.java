@@ -90,6 +90,7 @@ public final class PickupGameTests {
         helper.assertTrue(p.isPresent(), "farmpickup:pickup is in the vehicle registry");
         VehicleProfile t = p.get();
         helper.assertValueEqual(t.seats().size(), 2, "two seats");
+        helper.assertValueEqual(t.durability(), 8.0, "a truck's durability (Vanilla Wheels' D-0034)");
         helper.assertValueEqual(t.doors().size(), 1, "a tailgate");
         helper.assertValueEqual((int) t.seats().stream().filter(VehicleProfile.Seat::driver).count(), 1, "one driver");
         helper.assertTrue(t.engine().isPresent(), "an engine");
