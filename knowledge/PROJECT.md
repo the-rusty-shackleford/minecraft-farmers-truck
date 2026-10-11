@@ -16,7 +16,10 @@ with the protocol nested inside. The body is a deliberate derivative of his proj
 the two meshes are exported from it by `devtools/art/build.py`, his build ported. The
 repo is `minecraft-farmers-truck`, Rusty's name for it.
 
-## 1.5.0 — built and gated 2026-10-10, unreleased (durability 8)
+## 1.5.0 — released 2026-10-11 in pack 1.82.0 (durability 8)
+
+Released on Rusty's go ("Release the 2026-10-10 batch and Survivalist Armor 0.2.0. This is my go."), tag `v1.5.0` at `d9c2160`, the release gate (2026-10-11, `clean build --no-build-cache`) green again on that commit; sha1 `07b21ecb` on GitHub and on the server (the server repo's `knowledge/releases/pack-1.82.0.md`). Not yet seen in play on the box.
+
 
 Its profile names `durability` 8 (Vanilla Wheels 1.14.0's D-0034): seven pistol rounds to a wreck,
 where one did. It nests Vanilla Wheels 1.14.0 (it had nested 1.8.0). Gate: the release gate (2026-10-10, `clean build --no-build-cache`) green with 7 gametests and the booth's 13 checks.
